@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Audio Test</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <h1>Test</h1>
+    <audio controls>
+      <source src="./audio/06-Coconut-Champagne.mp3" type="audio/mpeg">
+    </audio>
+    <div width="100%">
+      <canvas id="oscilloscope" width="500" height="300"></canvas>
+    </div>
+    <div class="eq-controls">
+      <div class="low">
+        <div id="slidecontainer">
+          <label>Low Shelf Frequency</label>
+          <input type="range" min="50" max="300" value="175" class="slider" id="lowBand">
+        </div>
+        <div id="slidecontainer">
+          <label>Low Shelf Gain</label>
+          <input type="range" min="-20" max="20" value="0" class="slider" id="lowGain">
+        </div>
+      </div>
+      <div class="mid">
+        <div id="slidecontainer">
+          <label>Mid Band Frequency</label>
+          <input type="range" min="300" max="900" value="600" class="slider" id="midBand" class="mid">
+        </div>
+        <div id="slidecontainer">
+          <label>Mid Band Gain</label>
+          <input type="range" min="-20" max="20" value="0" class="slider" id="midGain" class="mid">
+        </div>
+        <div id="slidecontainer">
+          <label>Mid Band Q</label>
+          <input type="range" min="0.1" max="2" value="1" class="slider" id="midQ" class="mid">
+        </div>
+      </div>
+      <div class="high">
+        <div id="slidecontainer">
+          <label>High Shelf Frequency</label>
+          <input type="range" min="1000" max="5000" value="2500" class="slider" id="highBand">
+        </div>
+        <div id="slidecontainer">
+          <label>High Shelf Gain</label>
+          <input type="range" min="-20" max="20" value="0" class="slider" id="highGain">
+        </div>
+      </div>
+    </div>
+    <div class="chart">
+
+    </div>
+  </body>
+  <script type="text/javascript">
+
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    var myAudio = document.querySelector('audio');
+    var source = audioCtx.createMediaElementSource(myAudio);
+
+    var gainNode = audioCtx.createGain();
+
+    var analyser = audioCtx.createAnalyser();
+
+    // ...
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+
+    // Get a canvas defined with ID "oscilloscope"
+    var canvas = document.getElementById("oscilloscope");
+    var canvasCtx = canvas.getContext("2d");
+
+    // draw an oscilloscope of the current audio source
+
+    function draw() {
+
+      drawVisual = requestAnimationFrame(draw);
+
+      analyser.getByteTimeDomainData(dataArray);
+
+      canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+      canvasCtx.beginPath();
+
+      var sliceWidth = canvas.width * 1.0 / bufferLength;
+      var x = 0;
+
+      for (var i = 0; i < bufferLength; i++) {
+
+        var v = dataArray[i] / 128.0;
+        var y = v * canvas.height / 2;
+
+        if (i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+    };
+
+    draw();
+
+    var paraLow = audioCtx.createBiquadFilter();
+    var paraMid = audioCtx.createBiquadFilter();
+    var paraHigh = audioCtx.createBiquadFilter();
+
+    function threeBandPara() {
+
+      // declare the bands
+      paraLow.type = "lowshelf";
+      paraMid.type = "notch";
+      paraHigh.type = "highshelf";
+
+      // freq and gain for lowshelf
+      $('#lowBand').on('mousemove', function() {
+        paraLow.frequency.value = parseInt($('#lowBand').val());
+        // console.log(lowBand.val());
+      });
+      $('#lowGain').on('mousemove', function() {
+        paraLow.gain.value = parseInt($('#lowGain').val());
+      });
+
+      // freq, Q, and gain for midBand
+      $('.mid').on('mousemove', function() {
+        paraMid.frequency.value = parseInt($('#midBand').val());
+        paraMid.gain.value = $('#midGain').val();
+        // paraMid.Q.value = $('#midQ').val();
+      });
+
+      // freq and gain for highshelf
+      // freq and gain for lowshelf
+      $('#highBand').on('mousemove', function() {
+        paraHigh.frequency.value = parseInt($('#highBand').val());
+        // console.log(lowBand.val());
+      });
+      $('#highGain').on('mousemove', function() {
+        paraHigh.gain.value = parseInt($('#highGain').val());
+      });
+
+
+    };
+    threeBandPara();
+
+    source.connect(gainNode);
+    gainNode.connect(paraLow);
+    paraLow.connect(paraMid);
+    paraMid.connect(paraHigh);
+    paraHigh.connect(analyser);
+    // gainNode.connect(analyser);
+    analyser.connect(audioCtx.destination)
+  </script>
+</html>
