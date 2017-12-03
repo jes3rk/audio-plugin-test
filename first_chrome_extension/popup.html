@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="popup.js" charset="utf-8"></script>
+    <style media="screen">
+      body {
+        min-width: 250px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Channel Strip</h1>
+    <h3>Gain</h3>
+    <h5 id="gain-label">0 db</h5>
+    <div class="gain">
+      <div id="slidecontainer">
+        <label for="#gain">-10 db</label>
+        <input type="range" min="-10" max="10" value="0" class="slider" id="gain">
+        <label for="#gain">+10 db</label>
+      </div>
+    </div>
+    <h3>Parametric EQ</h3>
+    <div class="para-EQ">
+
+    </div>
+    <!-- <h3>Graphic EQ</h3>
+    <div class="graphic-EQ">
+
+    </div> -->
+    <h3>Compressor</h3>
+    <div class="comp">
+
+    </div>
+  </body>
+</html>

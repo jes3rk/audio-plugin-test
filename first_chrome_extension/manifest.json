@@ -1,0 +1,15 @@
+{
+ "manifest_version": 2,
+"name": "Browser Channel Strip",
+ "description": "Gives the user access to audio processing tools such as EQ, compression, and delay right in the browser.",
+ "version": "1.0",
+"browser_action": {
+ "default_icon": "headphones.png",
+ "default_popup": "popup.html",
+ "default_title": "Channel Strip Config"
+},
+"permissions": [
+    "activeTab",
+    "storage"
+  ]
+}
